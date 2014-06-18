@@ -80,10 +80,10 @@ class App(object):
         def stat():
             """ return the inode"""
 	    return os.stat(self.filename).st_ino
-        inode = stat()
+        inode, _ = stat()
+            
         while True:
             line, err = goify(file_obj.readline)()
-            print line
 	    if err != nil:
 		#couldn't read line, break
 		break
@@ -94,6 +94,7 @@ class App(object):
 		    time.sleep(1)
 		    continue
                 if inode != latest_inode:
+                    print "a", inode, latest_inode
                     #it has, reopen the file
                     file_obj.close()
                     # also, if we just statted it, it's likely
@@ -111,10 +112,11 @@ class App(object):
 
             val = float(match.group('duration').replace(",", ""))
             try:
+                # handle timezones yuckily
                 timestamp = time.mktime(
 		    time.strptime(match.group('timestamp'), self.tsformat)
 		)
-            except ValueError:
+            except ValueError, e:
                 continue
             self.send("{} {} {}\n".format(self.key, val, timestamp))
             # re-open the file every minute,
